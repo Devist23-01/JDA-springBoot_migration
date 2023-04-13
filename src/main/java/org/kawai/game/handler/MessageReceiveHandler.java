@@ -3,6 +3,8 @@ package org.kawai.game.handler;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.kawai.game.ChatLogRepository;
+import org.kawai.game.Chatlog;
 import org.kawai.game.command.CommandHolder;
 import org.kawai.game.command.CommandType;
 import org.kawai.game.utils.BotEventUtils;
@@ -16,12 +18,19 @@ import java.util.Arrays;
 public class MessageReceiveHandler extends ListenerAdapter {
     private final CommandHolder holder;
 
+    private final ChatLogRepository chatLogRepository;
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (BotEventUtils.isBot(event)) {
             return;
         }
+
+        chatLogRepository.saveAndFlush(Chatlog.create(
+                event.getAuthor().getName(),
+                event.getAuthor().getId(),
+                event.getMessage().getContentRaw(),
+                event.getMessage().getTimeCreated().toLocalDateTime()));
 
         String message = event.getMessage().getContentRaw();
 
